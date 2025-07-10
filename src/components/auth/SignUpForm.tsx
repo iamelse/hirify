@@ -44,24 +44,29 @@ export default function SignUpForm() {
   const onSubmit = async (data: SignupFormData) => {
     setLoading(true);
 
-    const res = await fetch("/api/auth/signup", {
-      method: "POST",
-      body: JSON.stringify(data),
-      headers: { "Content-Type": "application/json" },
-    });
+    try {
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: { "Content-Type": "application/json" },
+      });
 
-    const result = await res.json();
+      const result = await res.json();
 
-    if (res.ok) {
-      toast.success("Sign up successful! Redirecting...");
-      setTimeout(() => {
-        router.push("/signin");
-      }, 2000);
-    } else {
-      toast.error(result.error || "Failed to sign up");
+      if (res.ok) {
+        toast.success("Sign up successful! Redirecting...");
+        setTimeout(() => {
+          router.push("/signin");
+        }, 2000);
+      } else {
+        toast.error(result.error || "Failed to sign up");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   const inputErrorClass = "border border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500/30";
