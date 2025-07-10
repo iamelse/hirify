@@ -1,42 +1,31 @@
-import React, { FC } from "react";
+import React from "react";
 
-interface InputProps {
-  type?: "text" | "number" | "email" | "password" | "date" | "time" | string;
-  id?: string;
-  name?: string;
-  placeholder?: string;
-  defaultValue?: string | number;
-  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  className?: string;
-  min?: string;
-  max?: string;
-  step?: number;
-  disabled?: boolean;
+export interface InputProps
+  extends React.InputHTMLAttributes<HTMLInputElement> {
   success?: boolean;
   error?: boolean;
-  hint?: string; // Optional hint text
+  hint?: string;
 }
 
-const Input: FC<InputProps> = ({
-  type = "text",
-  id,
-  name,
-  placeholder,
-  defaultValue,
-  onChange,
-  className = "",
-  min,
-  max,
-  step,
-  disabled = false,
-  success = false,
-  error = false,
-  hint,
-}) => {
-  // Determine input styles based on state (disabled, success, error)
+const Input = React.forwardRef<HTMLInputElement, InputProps>((props, ref) => {
+  const {
+    type = "text",
+    id,
+    name,
+    placeholder,
+    className = "",
+    min,
+    max,
+    step,
+    disabled = false,
+    success = false,
+    error = false,
+    hint,
+    ...rest
+  } = props;
+
   let inputClasses = `h-11 w-full rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 ${className}`;
 
-  // Add styles for the different states
   if (disabled) {
     inputClasses += ` text-gray-500 border-gray-300 cursor-not-allowed dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700`;
   } else if (error) {
@@ -50,20 +39,19 @@ const Input: FC<InputProps> = ({
   return (
     <div className="relative">
       <input
+        ref={ref}
         type={type}
         id={id}
         name={name}
         placeholder={placeholder}
-        defaultValue={defaultValue}
-        onChange={onChange}
         min={min}
         max={max}
         step={step}
         disabled={disabled}
         className={inputClasses}
+        {...rest}
       />
 
-      {/* Optional Hint Text */}
       {hint && (
         <p
           className={`mt-1.5 text-xs ${
@@ -79,6 +67,8 @@ const Input: FC<InputProps> = ({
       )}
     </div>
   );
-};
+});
+
+Input.displayName = "Input";
 
 export default Input;
