@@ -49,7 +49,7 @@ export default function SignInForm() {
 
       if (res.ok) {
         toast.success("Signed in successfully!");
-        router.push("/"); // Ganti sesuai routing-mu
+        router.push("/user/home"); // Ganti sesuai routing-mu
       } else {
         toast.error(result.error || "Failed to sign in");
       }

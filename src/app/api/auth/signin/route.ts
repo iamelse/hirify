@@ -1,12 +1,11 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/SupabaseServer";
-import { cookies } from "next/headers";
 
 export async function POST(req: Request) {
   const body = await req.json();
   const { email, password } = body;
 
-  const supabase = await createSupabaseServerClient(); // ✅ tambahkan await
+  const supabase = await createSupabaseServerClient();
 
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
@@ -17,25 +16,26 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: error.message }, { status: 401 });
   }
 
-  // Set token cookie jika berhasil login
-  const cookieStore = await cookies(); // ✅
-
   const accessToken = data.session?.access_token;
   const refreshToken = data.session?.refresh_token;
 
-  if (accessToken && refreshToken) {
-    cookieStore.set("sb-access-token", accessToken, {
-      path: "/",
-      httpOnly: true,
-      secure: true,
-    });
-
-    cookieStore.set("sb-refresh-token", refreshToken, {
-      path: "/",
-      httpOnly: true,
-      secure: true,
-    });
+  if (!accessToken || !refreshToken) {
+    return NextResponse.json({ error: "Token missing" }, { status: 400 });
   }
 
-  return NextResponse.json({ message: "Login berhasil", data });
+  const res = NextResponse.json({ message: "Login berhasil", data });
+
+  res.cookies.set("sb-access-token", accessToken, {
+    path: "/",
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+  });
+
+  res.cookies.set("sb-refresh-token", refreshToken, {
+    path: "/",
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+  });
+
+  return res;
 }
