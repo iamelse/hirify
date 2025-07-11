@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import Link from "next/link";
+import { toast } from "react-hot-toast";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Dropdown } from "../ui/dropdown/Dropdown";
@@ -50,11 +50,9 @@ export default function UserDropdown() {
     fetchUser();
   }, []);
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
   async function handleSignOut() {
+    const toastId = toast.loading("Signing out..."); // 👈 Tampilkan toast loading
+
     try {
       const res = await fetch("/api/auth/signout", {
         method: "POST",
@@ -62,11 +60,14 @@ export default function UserDropdown() {
           "Content-Type": "application/json",
         },
       });
+
       if (!res.ok) throw new Error("Failed to sign out");
 
-      setUser(null); // hapus user di state
-      router.push("/signin"); // redirect ke halaman sign in
+      toast.success("Signed out successfully", { id: toastId }); // ✅ Berhasil
+      setUser(null);
+      router.push("/signin");
     } catch (error) {
+      toast.error("Sign out failed", { id: toastId }); // ❌ Error
       console.error("Sign out error:", error);
     }
   }
