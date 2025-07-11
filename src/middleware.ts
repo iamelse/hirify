@@ -1,31 +1,34 @@
-// middleware.ts
 import { NextRequest, NextResponse } from "next/server";
 import { isAuthenticated } from "@/lib/auth";
 
 export async function middleware(req: NextRequest) {
   const token = req.cookies.get("sb-access-token")?.value;
-  const { valid } = await isAuthenticated(token); // ✅ pakai await
-
-  console.log("MIDDLEWARE", { token, valid, path: req.nextUrl.pathname });
+  const { valid, user } = await isAuthenticated(token);
 
   const pathname = req.nextUrl.pathname;
 
-  // Lewati jika file statis
+  // Lewati file statis
   if (/\.(js|css|svg|png|jpg|webp|ico|map)$/.test(pathname)) {
     return NextResponse.next();
   }
 
-  // Rute terlindungi
+  // 🔐 Rute /user hanya untuk role USER
   if (pathname.startsWith("/user")) {
     if (!valid) {
       return NextResponse.redirect(new URL("/signin", req.url));
     }
+
+    // ⛔️ Sudah login tapi role tidak valid → redirect ke /not-found
+    if (user?.role !== "USER") {
+      return NextResponse.rewrite(new URL("/not-found", req.url));
+    }
   }
 
-  // Halaman auth tidak bisa diakses jika sudah login
+  // 🛑 Auth pages tidak bisa diakses jika sudah login
   if (pathname === "/signin" || pathname === "/signup") {
     if (valid) {
-      return NextResponse.redirect(new URL("/user/home", req.url));
+      const redirectPath = user?.role === "ADMIN" ? "/admin/dashboard" : "/user/home";
+      return NextResponse.redirect(new URL(redirectPath, req.url));
     }
   }
 
