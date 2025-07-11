@@ -147,7 +147,7 @@ export default function SignUpForm() {
               )}
             </div>
 
-            {/* Terms Checkbox */}
+            {/* Terms Checkbox 
             <div className="flex items-center gap-3">
               <Checkbox
                 className="w-5 h-5"
@@ -165,6 +165,7 @@ export default function SignUpForm() {
                 </span>
               </p>
             </div>
+            */}
 
             {/* Submit Button */}
             <div>
